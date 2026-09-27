@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ForgeGUI Campaign — Editor Workflow</title>
+<style>
+:root{
+  --bg:#f7f6fb; --card:#ffffff; --ink:#1c1b26; --sub:#6b6779;
+  --accent:#7c5cff; --accent2:#00b39a; --line:#e6e2f5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#100f18; --card:#181722; --ink:#f1eefb; --sub:#a29dbd; --line:#2a273b;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#100f18; --card:#181722; --ink:#f1eefb; --sub:#a29dbd; --line:#2a273b;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55;}
+.wrap{max-width:900px; margin:0 auto; padding:36px 20px 90px;}
+header{text-align:center; margin-bottom:36px;}
+header .tag{display:inline-block; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:6px 16px; border-radius:20px; margin-bottom:14px;}
+h1{font-size:clamp(24px,5vw,34px); margin:0 0 10px; font-weight:800;}
+header p{color:var(--sub); max-width:560px; margin:0 auto; font-size:14.5px;}
+
+.reveal{opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+.banner{
+  background:linear-gradient(135deg, rgba(124,92,255,.12), rgba(0,179,154,.10));
+  border:1px solid var(--line); border-radius:16px; padding:18px 22px; margin-bottom:40px; font-size:14px;
+}
+.banner b{color:var(--accent);}
+
+section{margin-top:44px;}
+h2{font-size:20px; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; display:inline-block;}
+.lead{color:var(--sub); font-size:13.5px; margin:4px 0 18px; max-width:640px;}
+
+.flow{position:relative;}
+.flow::before{content:""; position:absolute; left:23px; top:4px; bottom:4px; width:3px; background:linear-gradient(var(--accent),var(--accent2)); border-radius:3px;}
+.step{position:relative; padding-left:60px; margin-bottom:18px;}
+.step .num{position:absolute; left:0; top:0; width:48px; height:48px; border-radius:50%; background:var(--card); border:3px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; z-index:1;}
+.step:nth-child(even) .num{border-color:var(--accent2); color:var(--accent2);}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 18px;}
+.card h3{margin:0 0 4px; font-size:15px;}
+.card p{margin:0; color:var(--sub); font-size:13px;}
+
+.do-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
+@media(max-width:600px){.do-grid{grid-template-columns:1fr;}}
+.do-item{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 16px; font-size:13.5px; display:flex; gap:10px; align-items:flex-start;}
+.do-item .ic{flex-shrink:0;}
+
+.rules-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+@media(max-width:600px){.rules-grid{grid-template-columns:1fr;}}
+.rule{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px;}
+.rule .emoji{font-size:22px; display:block; margin-bottom:6px;}
+.rule h4{margin:0 0 4px; font-size:14px;}
+.rule p{margin:0; color:var(--sub); font-size:13px;}
+
+.assets-box{background:var(--card); border:1px dashed var(--accent); border-radius:14px; padding:18px 20px; text-align:center;}
+.assets-box a{display:inline-block; margin-top:10px; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; text-decoration:none; font-weight:700; font-size:13.5px; padding:10px 22px; border-radius:24px;}
+
+.checklist{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px;}
+.checklist label{display:flex; gap:10px; align-items:flex-start; font-size:14px; margin-bottom:10px; cursor:pointer;}
+.checklist input{margin-top:3px; accent-color:var(--accent);}
+
+.tg-cta{text-align:center; margin-top:50px;}
+.tg-btn{display:inline-block; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; font-weight:700; font-size:15px; padding:14px 32px; border-radius:30px; text-decoration:none; box-shadow:0 8px 26px rgba(124,92,255,.25);}
+footer{text-align:center; margin-top:36px; color:var(--sub); font-size:12.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="reveal">
+  <span class="tag">ForgeGUI Campaign</span>
+  <h1>Editor Workflow</h1>
+  <p>Everything you need to turn provided ForgeGUI footage into a clean, native-feeling short.</p>
+</header>
+
+<div class="banner reveal">
+  <b>Your job:</b> take the footage you're given, repurpose it with simple edits, and submit it. You are not sourcing footage, creating from scratch, posting, or managing any account.
+</div>
+
+<section class="reveal">
+  <h2>🎯 Overview</h2>
+  <p class="lead">ForgeGUI is an AI tool for developers and creators — it generates thumbnails, 3D models, GUIs, skins, and even scripting/coding help. This campaign shows it off to Roblox and Fortnite developers through YouTube Shorts, TikTok, and Instagram Reels. The content must feel <b>natural, clean, and organic</b> — not like an ad.</p>
+</section>
+
+<section class="reveal">
+  <h2>🔁 The Editing Flow</h2>
+  <div class="flow">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="card"><h3>Receive footage</h3><p>You'll be given pre-made ForgeGUI clips — no sourcing or filming needed.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="card"><h3>Repurpose it</h3><p>Add captions, trim for pacing, apply simple zooms/cuts/transitions, and add music.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="card"><h3>Keep it native</h3><p>Simple UGC style, minimal, easy to understand — avoid anything that feels like aggressive promotion.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">4</div>
+      <div class="card"><h3>Show ForgeGUI clearly</h3><p>The tool's features need to be visible — an actual demo moment is required, not just a mention.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">5</div>
+      <div class="card"><h3>Submit</h3><p>Deliver the finished edit — submission details will be shared with you directly.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <h2>✂️ What Counts as "Repurposing"</h2>
+  <div class="do-grid">
+    <div class="do-item"><span class="ic">💬</span><span>Captions or text on screen</span></div>
+    <div class="do-item"><span class="ic">✂️</span><span>Slight trimming or pacing changes</span></div>
+    <div class="do-item"><span class="ic">🔍</span><span>Simple zooms, cuts, or transitions</span></div>
+    <div class="do-item"><span class="ic">🎵</span><span>Music (recommended)</span></div>
+  </div>
+  <p class="lead" style="margin-top:14px;"><b>Never</b> upload the provided footage with zero changes — it must feel repurposed, not reposted.</p>
+</section>
+
+<section class="reveal">
+  <h2>🔗 Reference Videos</h2>
+  <p class="lead">Examples of the native, UGC-style energy we're going for. These link out to the original creators — study the pacing, hook, and caption style, not the exact content.</p>
+  <div class="do-grid">
+    <a class="do-item" href="https://www.tiktok.com/@johasww/video/7670506619209370897" target="_blank" rel="noopener" style="text-decoration:none; color:var(--ink);"><span class="ic">▶️</span><span>Reference — @johasww</span></a>
+    <a class="do-item" href="https://www.tiktok.com/@burtrblx/video/7667829039058521358" target="_blank" rel="noopener" style="text-decoration:none; color:var(--ink);"><span class="ic">▶️</span><span>Reference — @burtrblx</span></a>
+    <a class="do-item" href="https://www.tiktok.com/@ranters6000/video/7683203017604173076" target="_blank" rel="noopener" style="text-decoration:none; color:var(--ink);"><span class="ic">▶️</span><span>Reference — @ranters6000</span></a>
+    <a class="do-item" href="https://www.tiktok.com/@noobfartsalot/video/7680630879760174357" target="_blank" rel="noopener" style="text-decoration:none; color:var(--ink);"><span class="ic">▶️</span><span>Reference — @noobfartsalot</span></a>
+  </div>
+</section>
+
+<section class="reveal">
+  <h2>✅ Quality &amp; Approval Standards</h2>
+  <div class="rules-grid">
+    <div class="rule"><span class="emoji">🎬</span><h4>Real editing effort</h4><p>Content with little original effort may be rejected.</p></div>
+    <div class="rule"><span class="emoji">🛠️</span><h4>Actual demo required</h4><p>Clips must highlight ForgeGUI features clearly, not just mention them.</p></div>
+    <div class="rule"><span class="emoji">🚫</span><h4>No misleading content</h4><p>Low-quality, poorly presented, or off-topic submissions may be denied.</p></div>
+    <div class="rule"><span class="emoji">🪝</span><h4>No bait-and-switch</h4><p>The hook must match the rest of the video — never unrelated to what follows.</p></div>
+  </div>
+</section>
+
+<section class="reveal">
+  <h2>📁 Assets</h2>
+  <div class="assets-box">
+    <p style="margin:0; color:var(--sub); font-size:13.5px;">Provided ForgeGUI footage lives here — use only this source material for your edits.</p>
+    <a href="https://drive.google.com/drive/folders/1vFXrGZbqmMJbdxwuoEZvZbBXdBQ8c_c-?usp=sharing" target="_blank" rel="noopener">Open Assets Folder</a>
+  </div>
+  <div class="assets-box" style="margin-top:14px;">
+    <p style="margin:0; color:var(--sub); font-size:13.5px;">Additional campaign assets.</p>
+    <a href="https://drive.google.com/drive/folders/15V6s08dI0WxAEjhzFz_KIwX0h9QE-BDe?usp=sharing" target="_blank" rel="noopener">Open Additional Assets</a>
+  </div>
+</section>
+
+<section class="reveal">
+  <h2>📤 How to Submit Your Edit</h2>
+  <p class="lead">Once your edit is done, here's how to get it to us:</p>
+  <div class="flow">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="card"><h3>Upload to Google Drive</h3><p>Upload your finished video file to Google Drive.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="card"><h3>Set sharing to Public</h3><p>Right-click the file → Share → under "General access," set it to <b>"Anyone with the link"</b> so it can be opened without permission requests.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="card"><h3>Copy the link</h3><p>Click "Copy link" once sharing is set.</p></div>
+    </div>
+    <div class="step">
+      <div class="num">4</div>
+      <div class="card"><h3>Send it on Telegram</h3><p>Paste the link and send it over <a href="https://t.me/atlasdworks" target="_blank" rel="noopener">@atlasdworks</a> for review.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <h2>✅ Before You Submit</h2>
+  <div class="checklist">
+    <label><input type="checkbox"> Used only the provided ForgeGUI footage</label>
+    <label><input type="checkbox"> Added captions, pacing edits, zooms/cuts, or music — not uploaded raw</label>
+    <label><input type="checkbox"> Feels like natural UGC, not an ad</label>
+    <label><input type="checkbox"> ForgeGUI features are clearly demoed on screen</label>
+    <label><input type="checkbox"> Hook matches the rest of the video — no bait-and-switch</label>
+  </div>
+</section>
+
+<div class="tg-cta reveal">
+  <a href="https://t.me/atlasdworks" target="_blank" rel="noopener" class="tg-btn">💬 Message on Telegram</a>
+</div>
+
+<footer>Questions about a specific clip or requirement? Reach out before submitting.</footer>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var els = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {threshold:0.12});
+    els.forEach(function(el){ io.observe(el); });
+  } else {
+    els.forEach(function(el){ el.classList.add('in'); });
+  }
+});
+</script>
+</body>
+</html>
